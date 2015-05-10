@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script>
+        var applicationID = 'FF606FF1';
+        var session = null;
+        var namespace = 'chrome.cast.*';
+
+
+        window['__onGCastApiAvailable'] = (function (loaded, errorInfo) {
+            if (loaded) {
+                initializeCastApi();
+            } else {
+                console.log(errorInfo);
+            }
+        });
+
+        /**
+         * initialization
+         */
+        initializeCastApi = function() {
+            var sessionRequest = new chrome.cast.SessionRequest(applicationID);
+            var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
+                    sessionListener,
+                    receiverListener);
+            chrome.cast.initialize(apiConfig, onInitSuccess, onError);
+
+
+        };
+
+        /**
+         * initialization error callback
+         */
+        function onError(message) {
+            appendMessage("onError: " + JSON.stringify(message));
+        }
+
+        /**
+         * append message to debug message window
+         * @param {string} message A message string
+         */
+        function appendMessage(message) {
+            console.log(message);
+            var dw = document.getElementById("debugmessage");
+            dw.innerHTML += '\n' + JSON.stringify(message);
+        }
+
+
+        /**
+         * session listener during initialization
+         */
+        function sessionListener(e) {
+            appendMessage('New session ID:' + e.sessionId);
+            session = e;
+            session.addUpdateListener(sessionUpdateListener);
+            session.addMessageListener(namespace, receiverMessage);
+        }
+
+        function receiverListener(e) {
+            if( e === chrome.cast.ReceiverAvailablity.AVAILABLE) {
+            }
+        }
+
+        function onRequestSessionSuccess(e) {
+            session = e;
+        }
+
+        /**
+         * send a message to the receiver using the custom namespace
+         * receiver CastMessageBus message handler will be invoked
+         * @param {string} message A message string
+         */
+        function sendMessage(message) {
+            if (session != null) {
+                session.sendMessage(namespace, message, onSuccess.bind(this, "Message sent: " + message), onError);
+            }
+            else {
+                chrome.cast.requestSession(onRequestSessionSuccess, onError);
+            }
+        }
+
+    </script>
+    <title>cast sender</title>
+</head>
+<body onload="javascript:sendMessage('hello')">
+
+<table id="wrapper">
+    <tr>
+        <td>
+            <form method="get" action="JavaScript:update();">
+                <input id="input" class="border" type="text" size="30" onwebkitspeechchange="transcribe(this.value)" x-webkit-speech/>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<!-- Debbugging output -->
+<div style="margin:10px; visibility:hidden;">
+    <textarea rows="20" cols="70" id="debugmessage">
+    </textarea>
+</div>
+
+</body>
+</html>

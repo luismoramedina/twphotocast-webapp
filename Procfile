@@ -1,0 +1,1 @@
+web: gunicorn tw-pic-slide:app

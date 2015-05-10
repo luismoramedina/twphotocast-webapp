@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Title</title>
+
+   <script type="text/javascript">
+   function doSubmit () {
+      var user = document.getElementById('user').value;
+      window.location.href = "/twitter/user/" + user;
+      return false;
+   }
+   </script>
+</head>
+<body>
+
+
+
+<form onsubmit="return doSubmit()">
+   <input type="text" id="user" />
+   <input type="submit" />
+</form>
+
+</body>
+</html>
